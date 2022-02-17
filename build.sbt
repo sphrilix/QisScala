@@ -7,6 +7,7 @@ ThisBuild / libraryDependencies += "org.jsoup" % "jsoup" % "1.14.3"
 ThisBuild / libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.10" % Test
 ThisBuild / libraryDependencies += "com.github.daddykotex" %% "courier" % "3.0.1"
 
+
 lazy val root = (project in file("."))
   .settings(
     name := "QisScala3"

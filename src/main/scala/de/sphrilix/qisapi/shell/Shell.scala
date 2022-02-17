@@ -1,6 +1,6 @@
 package de.sphrilix.qisapi.shell
 
-import de.sphrilix.qisapi.api.{AuthenticationException, QisAPI}
+import de.sphrilix.qisapi.api.{AuthenticationException, QisAPI, QisAPIImpl}
 import de.sphrilix.qisapi.dto.{Course, Message, SMTPConfig}
 import de.sphrilix.qisapi.logging.{Level, QisLogger}
 import de.sphrilix.qisapi.persistence.txt.SetUpTXTHandler
@@ -24,7 +24,7 @@ object Shell:
         logAndExit("No init File found")).toString))
       val username = initFileArgs.getOrElse("qisUsername", logAndExit("No username found."))
       val pwd = initFileArgs.getOrElse("qisPassword", logAndExit("No password found."))
-      val apiSup = () => QisAPI(username, pwd)
+      val apiSup = () => QisAPIImpl(username, pwd)
       val smtpSup = () => SMTPConfig(initFileArgs)
       val file = File("./saveFile.csv")
       val receiver = initFileArgs.getOrElse("receiver", logAndExit("No receiver found!"))

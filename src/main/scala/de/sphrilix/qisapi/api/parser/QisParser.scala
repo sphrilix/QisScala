@@ -20,17 +20,19 @@ object QisParser {
       .map(_.attr("href"))
   end parseLinks
 
-  def parseGrades(html: String): Iterable[Course] =
+  def parseGrades(html: String): List[Course] =
     Jsoup.parse(html).select("table").asScala
       .filter(_.attr("summary").isEmpty)
       .flatMap(_.select("tr").asScala)
       .map(_.select("td"))
       .filter(_.size() == 9)
-      .map(_.asScala.map(_.text()).toList).flatMap(cells => Try(Course(courseNumber = cells.headOption.get,
-      name = cells.lift(1).get,
-      grade = cells.lift(3).get,
-      ects = cells.lift(5).get,
-      passed = cells.lift(4).get)).toOption)
+      .map(_.asScala.map(_.text()).toList)
+      .flatMap(cells => Try(Course(courseNumber = cells.headOption.get,
+        name = cells.lift(1).get,
+        grade = cells.lift(3).get,
+        ects = cells.lift(5).get,
+        passed = cells.lift(4).get)).toOption)
+      .toList
   end parseGrades
 
   def parseASI(html: String): String =

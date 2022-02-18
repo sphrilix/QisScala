@@ -29,7 +29,7 @@ object Course:
 
   def apply(courseNumber: String, name: String, grade: String,ects: String, passed: String): Course =
     Course(courseNumber,
-      name,
+      name.replace(",", " "),
       grade.replace(",", ".").toDouble,
       ects.replace(",", ".").toDouble,
       parsePassed(passed))

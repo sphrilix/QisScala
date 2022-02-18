@@ -25,7 +25,7 @@ class CheckForUpdatesTaskTest extends AnyFlatSpec with Matchers {
     CheckForUpdate(QisAPIMock(), f).run() shouldBe false
   }
 
- class QisAPIMock extends QisAPI {
+  class QisAPIMock extends QisAPI {
    override def getGrades: List[Course] = List(Course("1", "name", "2,0", "9,0", "bestanden"),
      Course("2", "na", "5,0", "9,0", "nicht bestanden"))
  }

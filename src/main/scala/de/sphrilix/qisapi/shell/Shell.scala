@@ -12,8 +12,11 @@ import scala.annotation.tailrec
 import scala.sys.exit
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.io.{File, FileNotFoundException}
+import java.lang
+import scala.language.postfixOps
 
 object Shell:
+
 
   def main(args: Array[String]): Unit =
     val argList = args.toList
@@ -28,6 +31,7 @@ object Shell:
       val smtpSup = () => SMTPConfig(initFileArgs)
       val file = File("./saveFile.csv")
       val receiver = initFileArgs.getOrElse("receiver", logAndExit("No receiver found!"))
+      val timeInterval = initFileArgs.getOrElse("timeInterval", logAndExit("No time interval found"))
       if clArgMap.contains("p") then
         QisLogger.log(Level.INFO, "Just print grades.")
         println(ppCourses(apiSup.apply().getGrades))
@@ -37,7 +41,7 @@ object Shell:
           case Failure(_) => logAndExit("Your mail credentials or smtp-config are wrong.")
         }
         QisLogger.log(Level.INFO, "Check for updates periodically.")
-        updateAndNotify(apiSup, file, smtpSup, receiver)
+        updateAndNotify(apiSup, file, smtpSup, receiver,timeInterval)
     catch
       case e: AuthenticationException => logAndExit("Qis credentials are wrong")
       case e: FileNotFoundException => logAndExit("Init file not found.")
@@ -51,19 +55,21 @@ object Shell:
     argList match
       case "-a" :: tail => filterOutCLArgs(tail, Map("a" -> true) ++ map)
       case "-p" :: tail => filterOutCLArgs(tail, Map("p" -> true) ++ map)
-      case "-f" :: value :: tail => filterOutCLArgs(tail, Map("f" -> value) ++  map)
+      case "-f" :: value :: tail => filterOutCLArgs(tail, Map("f" -> value) ++ map)
       case Nil => map
       case _ => Map()
     end match
+
   end filterOutCLArgs
 
   private def logAndExit(cause: String): Nothing =
     QisLogger.log(Level.ERROR, cause)
     exit(1)
+
   end logAndExit
 
   @tailrec
-  private def updateAndNotify(apiSup: () => QisAPI, file: File, confSup: () => SMTPConfig, receiver: String): Unit =
+  private def updateAndNotify(apiSup: () => QisAPI, file: File, confSup: () => SMTPConfig, receiver: String, timeInterval: String): Unit =
     if CheckForUpdate(apiSup.apply(), file).run() then
       QisLogger.log(Level.INFO, "Found new grade.")
       val message = Message("Update", "You got a new grade! Check: 'https://qisserver.uni-passau.de/'", receiver)
@@ -71,6 +77,6 @@ object Shell:
     else
       QisLogger.log(Level.INFO, "No new grade found.")
     end if
-    Thread.sleep(15 * 60_000)
-    updateAndNotify(apiSup, file, confSup, receiver)
+    Thread.sleep(timeInterval.toInt * 60_000)
+    updateAndNotify(apiSup, file, confSup, receiver, timeInterval)
   end updateAndNotify

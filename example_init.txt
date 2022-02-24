@@ -1,0 +1,7 @@
+qisUsername = Enter your HisQis username
+qisPassword = Enter your HisQis password
+mailUsername = Enter your username of your mail to send mail notification
+mailPassword = Enter your mail password
+smtp = Smtp-Url of your mail provider
+port = Smtp-Port of your mail provider
+receiver = Enter the mail which should receive the notifications

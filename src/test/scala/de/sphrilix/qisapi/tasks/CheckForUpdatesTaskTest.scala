@@ -3,11 +3,12 @@ package de.sphrilix.qisapi.tasks
 import de.sphrilix.qisapi.api.{QisAPI, QisAPIImpl}
 import de.sphrilix.qisapi.dto.Course
 import de.sphrilix.qisapi.persistence.csv.CourseCSVHandler
+import org.scalatest.DoNotDiscover
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.io.File
-
+@DoNotDiscover
 class CheckForUpdatesTaskTest extends AnyFlatSpec with Matchers {
 
   "Check update" should "return false" in {

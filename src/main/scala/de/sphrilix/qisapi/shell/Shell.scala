@@ -32,16 +32,19 @@ object Shell:
       val file = File("./saveFile.csv")
       val receiver = initFileArgs.getOrElse("receiver", logAndExit("No receiver found!"))
       val timeInterval = initFileArgs.getOrElse("timeInterval", logAndExit("No time interval found"))
+      val mail = initFileArgs.getOrElse("mail", true)
       if clArgMap.contains("p") then
         QisLogger.log(Level.INFO, "Just print grades.")
         println(ppCourses(apiSup.apply().getGrades))
       else
-        SetUp(file, receiver, smtpSup.apply()).run().onComplete {
-          case Success(_) => QisLogger.log(Level.INFO, "Initialized for checking on updates.")
-          case Failure(_) => logAndExit("Your mail credentials or smtp-config are wrong.")
-        }
+        if mail.toString.toBoolean then
+          SetUp(file, receiver, smtpSup.apply()).run().onComplete {
+            case Success(_) => QisLogger.log(Level.INFO, "Initialized for checking on updates.")
+            case Failure(_) => logAndExit("Your mail credentials or smtp-config are wrong.")
+          }
+        end if
         QisLogger.log(Level.INFO, "Check for updates periodically.")
-        updateAndNotify(apiSup, file, smtpSup, receiver,timeInterval)
+        updateAndNotify(apiSup, file, smtpSup, receiver, timeInterval)
     catch
       case e: AuthenticationException => logAndExit("Qis credentials are wrong")
       case e: FileNotFoundException => logAndExit("Init file not found.")
@@ -68,15 +71,26 @@ object Shell:
 
   end logAndExit
 
+  private def log(cause: String): Unit =
+    QisLogger.log(Level.ERROR, cause)
+
+  end log
+
   @tailrec
   private def updateAndNotify(apiSup: () => QisAPI, file: File, confSup: () => SMTPConfig, receiver: String, timeInterval: String): Unit =
-    if CheckForUpdate(apiSup.apply(), file).run() then
-      QisLogger.log(Level.INFO, "Found new grade.")
-      val message = Message("Update", "You got a new grade! Check: 'https://qisserver.uni-passau.de/'", receiver)
-      NotifyWithMsg(confSup.apply(), message).run()
-    else
-      QisLogger.log(Level.INFO, "No new grade found.")
-    end if
+    try
+      if CheckForUpdate(apiSup.apply(), file).run() then
+        QisLogger.log(Level.INFO, "Found new grade.")
+        val message = Message("Update", "You got a new grade! Check: 'https://qisserver.uni-passau.de/'", receiver)
+        NotifyWithMsg(confSup.apply(), message).run()
+      else
+        QisLogger.log(Level.INFO, "No new grade found.")
+      end if
+    catch
+      case e: AuthenticationException => log("Qis credentials are wrong")
+      case e: FileNotFoundException => log("Init file not found.")
+      case _ => log("Some unknown error occured.")
+    end try
     Thread.sleep(timeInterval.toInt * 60_000)
     updateAndNotify(apiSup, file, confSup, receiver, timeInterval)
   end updateAndNotify

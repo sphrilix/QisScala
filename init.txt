@@ -1,0 +1,9 @@
+qisUsername = primbs01
+qisPassword = ishbbdssg.8
+mailUsername = severinprimbs@gmail.com
+mailPassword = ishbbdssg.8
+smtp = smtp.gmail.com
+port = 587
+receiver = severinprimbs@yahoo.de
+timeInterval = 1
+mail = false
